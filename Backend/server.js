@@ -7,6 +7,10 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+const path = require('path');
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+
 // Rutas
 app.use('/api/productos', require('./routes/productos'));
 app.use('/api/carrito', require('./routes/carrito'));

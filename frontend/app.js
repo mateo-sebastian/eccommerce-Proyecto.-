@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api/productos';
+const API_URL = '/api/productos'; 
 const gridProductos = document.getElementById('grid-productos');
 const botonesFiltro = document.querySelectorAll('.btn-filtro');
 
