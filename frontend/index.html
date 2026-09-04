@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOX - Ropa Alternativa (Sk8 | Y2K | Gótico)</title>
+ <link rel="stylesheet" href="style.css">
+<body>
+
+  <header class="navbar">
+    <h1 class="logo">NOX<span>.alt</span></h1>
+    <nav class="filtros">
+      <button class="btn-filtro active" data-estilo="todos">Todos</button>
+      <button class="btn-filtro" data-estilo="sk8">Skate</button>
+      <button class="btn-filtro" data-estilo="y2k">Y2K</button>
+      <button class="btn-filtro" data-estilo="gotico">Gótico</button>
+    </nav>
+    <button id="btn-abrir-carrito" class="btn-carrito">
+      🛒 Carrito (<span id="contador-carrito">0</span>)
+    </button>
+  </header>
+
+  <main class="container">
+    <h2 class="section-title">Catálogo de Prendas</h2>
+    <div id="grid-productos" class="grid-productos"></div>
+  </main>
+
+  <!-- Panel Lateral del Carrito -->
+  <aside id="sidebar-carrito" class="sidebar-carrito">
+    <div class="carrito-header">
+      <h2>Tu Carrito</h2>
+      <button id="btn-cerrar-carrito" class="btn-cerrar">&times;</button>
+    </div>
+    <div id="items-carrito" class="carrito-body">
+      <p class="carrito-vacio">El carrito está vacío</p>
+    </div>
+    <div class="carrito-footer">
+      <div class="total-container">
+        <span>Total:</span>
+        <span id="total-precio">$0.00</span>
+      </div>
+      <button class="btn-checkout" onclick="alert('¡Próximamente paso a caja!')">Finalizar Compra</button>
+    </div>
+  </aside>
+
+  <!-- Fondo oscuro detrás del carrito -->
+  <div id="overlay" class="overlay"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
