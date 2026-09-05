@@ -17,10 +17,11 @@ exports.obtenerCarrito = async (req, res) => {
   }
 };
 
-// Agregar al carrito
+// Agregar al carrito (Corregido)
 exports.agregarAlCarrito = async (req, res) => {
   try {
     const { usuarioId, productoId, cantidad, talla } = req.body;
+    const cantidadAgregar = Number(cantidad) || 1;
 
     let carrito = await Carrito.findOne({ usuario: usuarioId });
 
@@ -33,15 +34,50 @@ exports.agregarAlCarrito = async (req, res) => {
     );
 
     if (itemIndex > -1) {
-      carrito.items[itemIndex].cantidad += cantidad || 1;
+      carrito.items[itemIndex].cantidad += cantidadAgregar;
+      carrito.markModified('items'); 
     } else {
-      carrito.items.push({ producto: productoId, cantidad: cantidad || 1, talla });
+      carrito.items.push({ 
+        producto: productoId, 
+        cantidad: cantidadAgregar, 
+        talla 
+      });
     }
 
     await carrito.save();
-    const carritoActualizado = await Carrito.findById(carrito._id).populate('items.producto');
-    res.json({ mensaje: 'Prenda agregada al carrito', carrito: carritoActualizado });
+    const carritoActualizado = await carrito.populate('items.producto');
+
+    res.json({ 
+      mensaje: 'Prenda agregada al carrito', 
+      carrito: carritoActualizado 
+    });
+
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al agregar al carrito', error: error.message });
+    res.status(500).json({ 
+      mensaje: 'Error al agregar al carrito', 
+      error: error.message 
+    });
   }
 };
+
+// Eliminar prenda del carrito
+exports.eliminarDelCarrito = async (req, res) => {
+  try {
+    const { usuarioId, productoId, talla } = req.body;
+    let carrito = await Carrito.findOne({ usuario: usuarioId });
+
+    if (carrito) {
+      carrito.items = carrito.items.filter(
+        item => !(item.producto.toString() === productoId && item.talla === talla)
+      );
+      
+      await carrito.save();
+      const carritoActualizado = await carrito.populate('items.producto');
+      return res.json({ mensaje: 'Producto eliminado', carrito: carritoActualizado });
+    }
+
+    res.status(404).json({ mensaje: 'Carrito no encontrado' });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error al eliminar', error: error.message });
+  }
+}; 
