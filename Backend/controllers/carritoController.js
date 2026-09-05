@@ -1,6 +1,6 @@
 const Carrito = require('../models/Carrito');
 
-// Obtener carrito del usuario
+// 1. Obtener carrito del usuario
 exports.obtenerCarrito = async (req, res) => {
   try {
     const { usuarioId } = req.params;
@@ -17,7 +17,7 @@ exports.obtenerCarrito = async (req, res) => {
   }
 };
 
-// Agregar al carrito (Corregido)
+// 2. Agregar al carrito
 exports.agregarAlCarrito = async (req, res) => {
   try {
     const { usuarioId, productoId, cantidad, talla } = req.body;
@@ -60,16 +60,20 @@ exports.agregarAlCarrito = async (req, res) => {
   }
 };
 
-// Eliminar prenda del carrito
+// 3. Eliminar una prenda específica del carrito
 exports.eliminarDelCarrito = async (req, res) => {
   try {
     const { usuarioId, productoId, talla } = req.body;
     let carrito = await Carrito.findOne({ usuario: usuarioId });
 
     if (carrito) {
+      // Filtramos el arreglo quitando el producto exacto
       carrito.items = carrito.items.filter(
         item => !(item.producto.toString() === productoId && item.talla === talla)
       );
+
+      // Notificamos a Mongoose el cambio en la propiedad 'items'
+      carrito.markModified('items');
       
       await carrito.save();
       const carritoActualizado = await carrito.populate('items.producto');
@@ -80,4 +84,24 @@ exports.eliminarDelCarrito = async (req, res) => {
   } catch (error) {
     res.status(500).json({ mensaje: 'Error al eliminar', error: error.message });
   }
-}; 
+};
+
+// 4. Vaciar carrito completo (para finalizar la compra)
+exports.vaciarCarrito = async (req, res) => {
+  try {
+    const { usuarioId } = req.body;
+    let carrito = await Carrito.findOne({ usuario: usuarioId });
+
+    if (carrito) {
+      carrito.items = [];
+      carrito.markModified('items');
+
+      await carrito.save();
+      return res.json({ mensaje: 'Carrito vaciado exitosamente', carrito });
+    }
+
+    res.status(404).json({ mensaje: 'Carrito no encontrado' });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error al vaciar carrito', error: error.message });
+  }
+};
