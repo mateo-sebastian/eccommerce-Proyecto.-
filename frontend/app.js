@@ -1,5 +1,6 @@
+// Ajusta la ruta base según tu backend (normalmente /api/carrito)
 const API_URL = '/api/productos';
-const API_CARRITO_URL = '/api/carritos';
+const API_CARRITO_URL = '/api/carrito'; 
 const USUARIO_ID = '6a9a47b37f7e40887b3a05d1';
 
 const gridProductos = document.getElementById('grid-productos');
@@ -24,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   configurarEventosCarrito();
 });
 
-// 1. Obtener productos del catálogo
+// 1. Cargar el catálogo
 async function obtenerProductos(estilo = 'todos') {
   try {
     let url = API_URL;
@@ -38,7 +39,7 @@ async function obtenerProductos(estilo = 'todos') {
   }
 }
 
-// 2. Cargar carrito desde MongoDB Atlas sin bloquear la vista
+// 2. Obtener el carrito desde MongoDB
 async function obtenerCarritoDB() {
   try {
     const res = await fetch(`${API_CARRITO_URL}/${USUARIO_ID}`);
@@ -91,7 +92,7 @@ function renderizarProductos(productos) {
       </div>
       <div>
         <p class="precio">$${prod.precio.toFixed(2)}</p>
-        <button class="btn-agregar" onclick="agregarAlCarrito('${prod._id}')">Agregar al carrito</button>
+        <button class="btn-agregar" onclick="window.agregarAlCarrito('${prod._id}')">Agregar al carrito</button>
       </div>
     `;
     gridProductos.appendChild(card);
@@ -108,11 +109,8 @@ function configurarFiltros() {
   });
 }
 
-// 3. Agregar al carrito y persistir en BD
-async function agregarAlCarrito(productoId) {
-  const producto = productosCargados.find(p => p._id === productoId);
-  if (!producto) return;
-
+// 3. Función global para agregar prendas al hacer clic
+window.agregarAlCarrito = async function(productoId) {
   try {
     const res = await fetch(`${API_CARRITO_URL}/agregar`, {
       method: 'POST',
@@ -128,14 +126,16 @@ async function agregarAlCarrito(productoId) {
     if (res.ok) {
       await obtenerCarritoDB();
       abrirCarrito();
+    } else {
+      console.error('Error al responder el servidor:', res.status);
     }
   } catch (err) {
-    console.error('Error enviando a la base de datos:', err);
+    console.error('Error al agregar prenda:', err);
   }
-}
+};
 
-// 4. Eliminar del carrito en BD
-async function eliminarDelCarrito(productoId) {
+// 4. Función global para eliminar prendas del carrito
+window.eliminarDelCarrito = async function(productoId) {
   try {
     const res = await fetch(`${API_CARRITO_URL}/eliminar`, {
       method: 'POST',
@@ -151,9 +151,9 @@ async function eliminarDelCarrito(productoId) {
       await obtenerCarritoDB();
     }
   } catch (err) {
-    console.error('Error al borrar de la BD:', err);
+    console.error('Error al eliminar prenda:', err);
   }
-}
+};
 
 function actualizarCarritoUI() {
   itemsCarritoContainer.innerHTML = '';
@@ -174,7 +174,7 @@ function actualizarCarritoUI() {
           <h4>${item.nombre}</h4>
           <p>Cant: ${item.cantidad} x $${item.precio.toFixed(2)}</p>
         </div>
-        <button class="btn-eliminar" onclick="eliminarDelCarrito('${item._id}')">✕</button>
+        <button class="btn-eliminar" onclick="window.eliminarDelCarrito('${item._id}')">✕</button>
       `;
       itemsCarritoContainer.appendChild(itemDiv);
     });
